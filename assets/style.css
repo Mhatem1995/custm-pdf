@@ -1,0 +1,36 @@
+.cpp-pdf-wrapper {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 2px solid #0073aa;
+    border-radius: 8px;
+    background-color: #f4faff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    max-width: 700px;
+}
+
+.cpp-pdf-item {
+    margin-bottom: 20px;
+}
+
+.cpp-pdf-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.cpp-download-btn {
+    display: inline-block;
+    background-color: #0073aa;
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.cpp-download-btn:hover {
+    background-color: #005a87;
+}
