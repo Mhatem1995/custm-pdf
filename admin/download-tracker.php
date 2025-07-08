@@ -8,8 +8,18 @@ add_action('wp_ajax_nopriv_cpp_track_download', 'cpp_track_download');
 function cpp_track_download() {
     global $wpdb;
     
+    // Add debugging
+    error_log('CPP: Track download called with data: ' . print_r($_POST, true));
+    
+    // Check if required POST data exists
+    if (!isset($_POST['nonce']) || !isset($_POST['post_id']) || !isset($_POST['pdf_url']) || !isset($_POST['pdf_title'])) {
+        error_log('CPP: Missing required data');
+        wp_die('Missing required data');
+    }
+    
     // Verify nonce for security
     if (!wp_verify_nonce($_POST['nonce'], 'cpp_track_download')) {
+        error_log('CPP: Security check failed');
         wp_die('Security check failed');
     }
     
@@ -21,7 +31,7 @@ function cpp_track_download() {
     
     $table_name = $wpdb->prefix . 'cpp_pdf_downloads';
     
-    $wpdb->insert(
+    $result = $wpdb->insert(
         $table_name,
         array(
             'post_id' => $post_id,
@@ -39,7 +49,13 @@ function cpp_track_download() {
         )
     );
     
-    wp_die(); // This is required to terminate immediately and return a proper response
+    if ($result === false) {
+        error_log('CPP: Database insert failed: ' . $wpdb->last_error);
+        wp_die('Database error');
+    }
+    
+    error_log('CPP: Download tracked successfully for post ' . $post_id);
+    wp_die('success'); // Return success message
 }
 
 // Enqueue JavaScript for tracking
@@ -48,9 +64,33 @@ add_action('wp_enqueue_scripts', 'cpp_enqueue_tracking_script');
 function cpp_enqueue_tracking_script() {
     if (is_singular('post')) {
         wp_enqueue_script('jquery');
-        wp_localize_script('jquery', 'cpp_ajax', array(
+        
+        // Enqueue the tracking script with jQuery dependency
+        wp_enqueue_script(
+            'cpp-tracking', 
+            plugin_dir_url(__FILE__) . '../assets/tracking.js', 
+            array('jquery'), 
+            '1.0', 
+            true
+        );
+        
+        wp_localize_script('cpp-tracking', 'cpp_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('cpp_track_download')
         ));
+    }
+}
+
+// Add debug function to check if AJAX is properly set up
+add_action('wp_footer', 'cpp_debug_ajax');
+function cpp_debug_ajax() {
+    if (is_singular('post')) {
+        echo '<script>
+        console.log("CPP Debug:", {
+            ajax_url: typeof cpp_ajax !== "undefined" ? cpp_ajax.ajax_url : "undefined",
+            nonce: typeof cpp_ajax !== "undefined" ? cpp_ajax.nonce : "undefined",
+            jquery_loaded: typeof jQuery !== "undefined"
+        });
+        </script>';
     }
 }
