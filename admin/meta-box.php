@@ -91,22 +91,75 @@ function cpp_pdf_meta_box_callback($post) {
             const input = row.find('.cpp-url');
             const fileNameDisplay = row.find('.cpp-file-name');
 
-            if (mediaUploader) {
-                mediaUploader.open();
-                return;
-            }
-
+            // Create new media uploader instance each time
             mediaUploader = wp.media({
-                title: 'Select PDF',
+                title: 'Select PDF File',
                 button: { text: 'Use this PDF' },
-                library: { type: 'application/pdf' },
+                library: { 
+                    type: ['application/pdf'],
+                    uploadedTo: null // Allow all PDFs, not just those uploaded to this post
+                },
                 multiple: false
             });
 
             mediaUploader.on('select', function() {
                 const attachment = mediaUploader.state().get('selection').first().toJSON();
+                
+                // Validate that it's actually a PDF
+                if (attachment.mime !== 'application/pdf' && attachment.subtype !== 'pdf') {
+                    alert('Please select a valid PDF file only.');
+                    return;
+                }
+                
+                // Additional validation for file extension
+                const fileName = attachment.filename || attachment.url.split('/').pop();
+                const fileExtension = fileName.split('.').pop().toLowerCase();
+                
+                if (fileExtension !== 'pdf') {
+                    alert('Please select a file with .pdf extension only.');
+                    return;
+                }
+                
+                // Validate file size (optional - adjust as needed)
+                const maxSizeInMB = 50; // 50MB limit
+                const fileSizeInMB = attachment.filesizeInBytes / (1024 * 1024);
+                
+                if (fileSizeInMB > maxSizeInMB) {
+                    alert(`File size is too large. Maximum allowed size is ${maxSizeInMB}MB.`);
+                    return;
+                }
+                
+                console.log('Selected PDF:', {
+                    filename: fileName,
+                    url: attachment.url,
+                    mime: attachment.mime,
+                    size: fileSizeInMB.toFixed(2) + 'MB'
+                });
+                
                 input.val(attachment.url);
-                fileNameDisplay.text(attachment.filename);
+                fileNameDisplay.text(fileName);
+                
+                // Auto-fill title if empty
+                const titleInput = row.find('.cpp-title');
+                if (!titleInput.val()) {
+                    const titleFromFilename = fileName.replace('.pdf', '').replace(/[-_]/g, ' ');
+                    titleInput.val(titleFromFilename);
+                }
+            });
+
+            mediaUploader.on('open', function() {
+                // Filter to show only PDFs
+                const selection = mediaUploader.state().get('selection');
+                const library = mediaUploader.state().get('library');
+                
+                // Clear any existing selection
+                selection.reset();
+                
+                // Add filter for PDFs only
+                library.props.set({
+                    type: 'application/pdf',
+                    uploadedTo: null
+                });
             });
 
             mediaUploader.open();
@@ -136,6 +189,12 @@ function cpp_pdf_meta_box_callback($post) {
         .cpp-file-name {
             font-style: italic;
             color: #555;
+            margin-left: 10px;
+        }
+        .cpp-file-name:before {
+            content: "Selected: ";
+            color: #0073aa;
+            font-weight: bold;
         }
         .cpp-remove-pdf {
             background: none;
@@ -146,6 +205,9 @@ function cpp_pdf_meta_box_callback($post) {
         }
         .cpp-remove-pdf:hover {
             text-decoration: underline;
+        }
+        .cpp-upload-button {
+            margin-right: 10px;
         }
     </style>
 
@@ -158,6 +220,59 @@ function cpp_save_pdf_meta($post_id) {
     if (!current_user_can('edit_post', $post_id)) return;
 
     $pdfs = $_POST['cpp_pdf_files'] ?? [];
-    update_post_meta($post_id, '_cpp_pdf_files', array_values($pdfs));
+    
+    // Clean and validate PDF data before saving
+    $clean_pdfs = [];
+    foreach ($pdfs as $pdf) {
+        // Skip empty entries
+        if (empty($pdf['url']) || empty($pdf['title'])) continue;
+        
+        // Validate URL is actually a PDF
+        $file_extension = pathinfo($pdf['url'], PATHINFO_EXTENSION);
+        if (strtolower($file_extension) !== 'pdf') continue;
+        
+        // Sanitize data
+        $clean_pdf = [
+            'title' => sanitize_text_field($pdf['title']),
+            'url' => esc_url_raw($pdf['url']),
+            'bg_color' => sanitize_hex_color($pdf['bg_color'] ?? '#f9f9f9'),
+            'border_color' => sanitize_hex_color($pdf['border_color'] ?? '#ccc'),
+            'button_bg' => sanitize_hex_color($pdf['button_bg'] ?? '#0073aa'),
+            'button_text' => sanitize_hex_color($pdf['button_text'] ?? '#ffffff'),
+            'download_disabled' => isset($pdf['download_disabled']) ? true : false
+        ];
+        
+        $clean_pdfs[] = $clean_pdf;
+    }
+    
+    update_post_meta($post_id, '_cpp_pdf_files', $clean_pdfs);
 }
 add_action('save_post', 'cpp_save_pdf_meta');
+
+// Add additional MIME type support for PDFs
+add_filter('upload_mimes', 'cpp_add_pdf_mime_types');
+function cpp_add_pdf_mime_types($mimes) {
+    $mimes['pdf'] = 'application/pdf';
+    return $mimes;
+}
+
+// Add file validation during upload
+add_filter('wp_handle_upload_prefilter', 'cpp_validate_pdf_upload');
+function cpp_validate_pdf_upload($file) {
+    if (isset($_POST['action']) && $_POST['action'] === 'upload-attachment') {
+        $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        
+        if (strtolower($file_extension) === 'pdf') {
+            // Additional validation for PDF files
+            $file_info = finfo_open(FILEINFO_MIME_TYPE);
+            $mime_type = finfo_file($file_info, $file['tmp_name']);
+            finfo_close($file_info);
+            
+            if ($mime_type !== 'application/pdf') {
+                $file['error'] = 'This file is not a valid PDF. Please upload a proper PDF file.';
+            }
+        }
+    }
+    
+    return $file;
+}
