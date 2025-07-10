@@ -28,12 +28,12 @@ function cpp_display_pdf_before_title($title, $id = null) {
 
         $output .= '<div class="cpp-pdf-wrapper" style="background-color:' . $bg_color . '; border: 2px solid ' . $border_color . '; padding: 20px; border-radius: 10px; margin-bottom: 25px; position: relative; z-index: 1000; margin: 0 auto 25px auto; max-width: 900px; width: 95%; display: block;">';
         $output .= '<div class="cpp-pdf-item">';
-        $output .= '<div class="cpp-pdf-title" style="font-weight: bold; font-size:' . $title_size . '; font-family:' . $font_family . '; margin-bottom: 15px; text-align: center;">' . $pdf_title . '</div>';
+        $output .= '<div class="cpp-pdf-title" style="font-weight: bold; font-size:' . $title_size . '; font-family:' . $font_family . '; margin-bottom: 15px; text-align: right;">' . $pdf_title . '</div>';
         
         if ($download_disabled) {
-            $output .= '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">تحميل ملف القانون</a>';
+            $output .= '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
         } else {
-            $output .= '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $id . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">تحميل ملف القانون</a>';
+            $output .= '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $id . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
         }
         
         $output .= '</div>';
@@ -73,12 +73,12 @@ function cpp_display_pdf_before_content($content) {
 
         $output .= '<div class="cpp-pdf-wrapper cpp-priority-block" style="background-color:' . $bg_color . '; border: 2px solid ' . $border_color . '; padding: 20px; border-radius: 10px; margin: 0 auto 25px auto; max-width: 900px; width: 95%; position: relative; z-index: 1000; clear: both; display: block;">';
         $output .= '<div class="cpp-pdf-item">';
-        $output .= '<div class="cpp-pdf-title" style="font-weight: bold; font-size:' . $title_size . '; font-family:' . $font_family . '; margin-bottom: 15px; text-align: center;">' . $pdf_title . '</div>';
+        $output .= '<div class="cpp-pdf-title" style="font-weight: bold; font-size:' . $title_size . '; font-family:' . $font_family . '; margin-bottom: 15px; text-align: right;">' . $pdf_title . '</div>';
         
         if ($download_disabled) {
-            $output .= '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">تحميل ملف القانون</a>';
+            $output .= '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
         } else {
-            $output .= '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $post->ID . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">تحميل ملف القانون</a>';
+            $output .= '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $post->ID . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
         }
         
         $output .= '</div>';
@@ -115,7 +115,7 @@ function cpp_priority_styles() {
         .cpp-pdf-title {
             font-weight: bold !important;
             font-size: 20px !important;
-            text-align: center !important;
+            text-align: right !important;
             margin-bottom: 15px !important;
         }
         
@@ -155,7 +155,7 @@ function cpp_priority_styles() {
         
         /* Center the PDF block content */
         .cpp-pdf-item {
-            text-align: center !important;
+            text-align: right !important;
         }
         
         /* Hide any elements that might appear above PDF blocks */
