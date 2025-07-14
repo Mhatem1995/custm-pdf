@@ -19,8 +19,16 @@ function cpp_pdf_meta_box_callback($post) {
     foreach ($pdfs as $index => $pdf) {
         $title = esc_attr($pdf['title']);
         $url = esc_url($pdf['url']);
-        $bg_color = esc_attr($pdf['bg_color'] ?? '#f9f9f9');
-        $border_color = esc_attr($pdf['border_color'] ?? '#ccc');
+        
+        // Auto-apply special colors for first PDF (index 0)
+        if ($index === 0) {
+            $bg_color = esc_attr($pdf['bg_color'] ?? '#3a4052'); // Lighter shade of #282e3f
+            $border_color = esc_attr($pdf['border_color'] ?? '#282e3f');
+        } else {
+            $bg_color = esc_attr($pdf['bg_color'] ?? '#f9f9f9');
+            $border_color = esc_attr($pdf['border_color'] ?? '#ccc');
+        }
+        
         $button_bg = esc_attr($pdf['button_bg'] ?? '#0073aa');
         $button_text = esc_attr($pdf['button_text'] ?? '#ffffff');
         $download_disabled = isset($pdf['download_disabled']) ? $pdf['download_disabled'] : false;
@@ -39,6 +47,9 @@ function cpp_pdf_meta_box_callback($post) {
 
         echo '<fieldset style="margin-top:10px; padding:10px; border:1px solid #ddd;">';
         echo '<legend><strong>Box Styles</strong></legend>';
+        if ($index === 0) {
+            echo '<p style="color: #0073aa; font-weight: bold; margin-bottom: 10px;">⭐ First PDF - Special Styling Applied</p>';
+        }
         echo "Box Background: <input type='color' name='cpp_pdf_files[{$index}][bg_color]' value='{$bg_color}' /><br>";
         echo "Border Color: <input type='color' name='cpp_pdf_files[{$index}][border_color]' value='{$border_color}' /><br>";
         echo "Button Background: <input type='color' name='cpp_pdf_files[{$index}][button_bg]' value='{$button_bg}' /><br>";
@@ -56,6 +67,17 @@ function cpp_pdf_meta_box_callback($post) {
         let mediaUploader;
 
         function createPDFRow(index) {
+            // Auto-apply special colors for first PDF (index 0)
+            let bgColor = '#f9f9f9';
+            let borderColor = '#ccc';
+            let specialNote = '';
+            
+            if (index === 0) {
+                bgColor = '#3a4052'; // Lighter shade of #282e3f
+                borderColor = '#282e3f';
+                specialNote = '<p style="color: #0073aa; font-weight: bold; margin-bottom: 10px;">⭐ First PDF - Special Styling Applied</p>';
+            }
+            
             return `
                 <div class="cpp-pdf-row">
                     <input type="text" class="cpp-title" name="cpp_pdf_files[${index}][title]" placeholder="PDF Title" />
@@ -71,8 +93,9 @@ function cpp_pdf_meta_box_callback($post) {
 
                     <fieldset style="margin-top:10px; padding:10px; border:1px solid #ddd;">
                         <legend><strong>Box Styles</strong></legend>
-                        Box Background: <input type="color" name="cpp_pdf_files[${index}][bg_color]" value="#f9f9f9" /><br>
-                        Border Color: <input type="color" name="cpp_pdf_files[${index}][border_color]" value="#ccc" /><br>
+                        ${specialNote}
+                        Box Background: <input type="color" name="cpp_pdf_files[${index}][bg_color]" value="${bgColor}" /><br>
+                        Border Color: <input type="color" name="cpp_pdf_files[${index}][border_color]" value="${borderColor}" /><br>
                         Button Background: <input type="color" name="cpp_pdf_files[${index}][button_bg]" value="#0073aa" /><br>
                         Button Text Color: <input type="color" name="cpp_pdf_files[${index}][button_text]" value="#ffffff" />
                     </fieldset>
@@ -83,6 +106,51 @@ function cpp_pdf_meta_box_callback($post) {
             const index = $('.cpp-pdf-row').length;
             $('#cpp-pdf-fields').append(createPDFRow(index));
         });
+
+        // Function to update special styling indicators when rows are reordered
+        function updateSpecialStyling() {
+            $('.cpp-pdf-row').each(function(index) {
+                const $row = $(this);
+                const $fieldset = $row.find('fieldset');
+                const $legend = $fieldset.find('legend');
+                const $bgInput = $row.find('input[name*="[bg_color]"]');
+                const $borderInput = $row.find('input[name*="[border_color]"]');
+                
+                // Remove existing special note
+                $fieldset.find('p').remove();
+                
+                if (index === 0) {
+                    // Add special note and update colors if they're still default
+                    $legend.after('<p style="color: #0073aa; font-weight: bold; margin-bottom: 10px;">⭐ First PDF - Special Styling Applied</p>');
+                    
+                    // Only update colors if they're still default values
+                    if ($bgInput.val() === '#f9f9f9') {
+                        $bgInput.val('#3a4052');
+                    }
+                    if ($borderInput.val() === '#ccc') {
+                        $borderInput.val('#282e3f');
+                    }
+                } else {
+                    // Revert to default colors if they're still special colors
+                    if ($bgInput.val() === '#3a4052') {
+                        $bgInput.val('#f9f9f9');
+                    }
+                    if ($borderInput.val() === '#282e3f') {
+                        $borderInput.val('#ccc');
+                    }
+                }
+                
+                // Update input names to reflect new index
+                $row.find('input, button').each(function() {
+                    const $input = $(this);
+                    const name = $input.attr('name');
+                    if (name && name.includes('[')) {
+                        const newName = name.replace(/\[\d+\]/, `[${index}]`);
+                        $input.attr('name', newName);
+                    }
+                });
+            });
+        }
 
         $(document).on('click', '.cpp-upload-button', function(e) {
             e.preventDefault();
@@ -168,6 +236,8 @@ function cpp_pdf_meta_box_callback($post) {
         $(document).on('click', '.cpp-remove-pdf', function() {
             if (confirm('هل انت متاكد من حذف ال pdf ?')) {
                 $(this).closest('.cpp-pdf-row').remove();
+                // Update special styling after removal
+                updateSpecialStyling();
             }
         });
     });
@@ -223,7 +293,7 @@ function cpp_save_pdf_meta($post_id) {
     
     // Clean and validate PDF data before saving
     $clean_pdfs = [];
-    foreach ($pdfs as $pdf) {
+    foreach ($pdfs as $index => $pdf) {
         // Skip empty entries
         if (empty($pdf['url']) || empty($pdf['title'])) continue;
         
@@ -231,12 +301,21 @@ function cpp_save_pdf_meta($post_id) {
         $file_extension = pathinfo($pdf['url'], PATHINFO_EXTENSION);
         if (strtolower($file_extension) !== 'pdf') continue;
         
+        // Auto-apply special colors for first PDF during save
+        if ($index === 0) {
+            $default_bg = '#3a4052'; // Lighter shade of #282e3f
+            $default_border = '#282e3f';
+        } else {
+            $default_bg = '#f9f9f9';
+            $default_border = '#ccc';
+        }
+        
         // Sanitize data
         $clean_pdf = [
             'title' => sanitize_text_field($pdf['title']),
             'url' => esc_url_raw($pdf['url']),
-            'bg_color' => sanitize_hex_color($pdf['bg_color'] ?? '#f9f9f9'),
-            'border_color' => sanitize_hex_color($pdf['border_color'] ?? '#ccc'),
+            'bg_color' => sanitize_hex_color($pdf['bg_color'] ?? $default_bg),
+            'border_color' => sanitize_hex_color($pdf['border_color'] ?? $default_border),
             'button_bg' => sanitize_hex_color($pdf['button_bg'] ?? '#0073aa'),
             'button_text' => sanitize_hex_color($pdf['button_text'] ?? '#ffffff'),
             'download_disabled' => isset($pdf['download_disabled']) ? true : false
@@ -275,4 +354,66 @@ function cpp_validate_pdf_upload($file) {
     }
     
     return $file;
+}
+
+// Function to upgrade existing posts to use special colors for first PDF
+function cpp_upgrade_existing_posts_first_pdf_colors() {
+    $posts = get_posts([
+        'post_type' => 'post',
+        'meta_key' => '_cpp_pdf_files',
+        'posts_per_page' => -1
+    ]);
+    
+    foreach ($posts as $post) {
+        $pdfs = get_post_meta($post->ID, '_cpp_pdf_files', true);
+        if (!empty($pdfs) && is_array($pdfs)) {
+            $updated = false;
+            
+            // Only update the first PDF if it has default colors
+            if (isset($pdfs[0])) {
+                $first_pdf = $pdfs[0];
+                
+                // Check if it has default colors and update
+                if (($first_pdf['bg_color'] ?? '#f9f9f9') === '#f9f9f9' && 
+                    ($first_pdf['border_color'] ?? '#ccc') === '#ccc') {
+                    
+                    $pdfs[0]['bg_color'] = '#3a4052';
+                    $pdfs[0]['border_color'] = '#282e3f';
+                    $updated = true;
+                }
+            }
+            
+            if ($updated) {
+                update_post_meta($post->ID, '_cpp_pdf_files', $pdfs);
+            }
+        }
+    }
+}
+
+// Add admin notice with button to upgrade existing posts
+add_action('admin_notices', 'cpp_upgrade_notice');
+function cpp_upgrade_notice() {
+    $screen = get_current_screen();
+    if ($screen->id === 'edit-post') {
+        if (isset($_GET['cpp_upgraded'])) {
+            echo '<div class="notice notice-success is-dismissible">';
+            echo '<p>✅ Successfully upgraded existing posts to use special colors for first PDF blocks!</p>';
+            echo '</div>';
+        } else {
+            echo '<div class="notice notice-info">';
+            echo '<p><strong>PDF Plugin:</strong> Want to apply special colors to first PDF blocks in existing posts? ';
+            echo '<a href="' . wp_nonce_url(admin_url('edit.php?post_type=post&cpp_upgrade=1'), 'cpp_upgrade') . '" class="button button-primary">Upgrade Existing Posts</a></p>';
+            echo '</div>';
+        }
+    }
+}
+
+// Handle the upgrade action
+add_action('admin_init', 'cpp_handle_upgrade');
+function cpp_handle_upgrade() {
+    if (isset($_GET['cpp_upgrade']) && wp_verify_nonce($_GET['_wpnonce'], 'cpp_upgrade')) {
+        cpp_upgrade_existing_posts_first_pdf_colors();
+        wp_redirect(admin_url('edit.php?post_type=post&cpp_upgraded=1'));
+        exit;
+    }
 }
