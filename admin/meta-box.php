@@ -22,7 +22,7 @@ function cpp_pdf_meta_box_callback($post) {
         
         // Auto-apply special colors for first PDF (index 0)
         if ($index === 0) {
-            $bg_color = esc_attr($pdf['bg_color'] ?? '#3a4052'); // Lighter shade of #282e3f
+            $bg_color = esc_attr($pdf['bg_color'] ?? '#e7e4e4'); // Lighter shade of #282e3f
             $border_color = esc_attr($pdf['border_color'] ?? '#282e3f');
         } else {
             $bg_color = esc_attr($pdf['bg_color'] ?? '#f9f9f9');
@@ -73,7 +73,7 @@ function cpp_pdf_meta_box_callback($post) {
             let specialNote = '';
             
             if (index === 0) {
-                bgColor = '#3a4052'; // Lighter shade of #282e3f
+                bgColor = '#e7e4e4'; // Lighter shade of #282e3f
                 borderColor = '#282e3f';
                 specialNote = '<p style="color: #0073aa; font-weight: bold; margin-bottom: 10px;">⭐ First PDF - Special Styling Applied</p>';
             }
@@ -125,14 +125,14 @@ function cpp_pdf_meta_box_callback($post) {
                     
                     // Only update colors if they're still default values
                     if ($bgInput.val() === '#f9f9f9') {
-                        $bgInput.val('#3a4052');
+                        $bgInput.val('#e7e4e4');
                     }
                     if ($borderInput.val() === '#ccc') {
                         $borderInput.val('#282e3f');
                     }
                 } else {
                     // Revert to default colors if they're still special colors
-                    if ($bgInput.val() === '#3a4052') {
+                    if ($bgInput.val() === '#e7e4e4') {
                         $bgInput.val('#f9f9f9');
                     }
                     if ($borderInput.val() === '#282e3f') {
@@ -303,7 +303,7 @@ function cpp_save_pdf_meta($post_id) {
         
         // Auto-apply special colors for first PDF during save
         if ($index === 0) {
-            $default_bg = '#3a4052'; // Lighter shade of #282e3f
+            $default_bg = '#e7e4e4'; // Lighter shade of #282e3f
             $default_border = '#282e3f';
         } else {
             $default_bg = '#f9f9f9';
