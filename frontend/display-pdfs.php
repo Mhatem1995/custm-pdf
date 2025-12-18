@@ -42,13 +42,16 @@ function cpp_force_pdf_at_top($content) {
         $download_disabled = isset($pdf['download_disabled']) ? $pdf['download_disabled'] : false;
 
         $pdf_output .= '<div class="cpp-pdf-wrapper cpp-priority-first" style="background-color:' . $bg_color . '; border: 2px solid ' . $border_color . '; padding: 20px; border-radius: 10px; margin: 0 auto 25px auto; max-width: 900px; width: 95%; position: relative; z-index: 9999; clear: both; display: block !important; visibility: visible !important;">';
-        $pdf_output .= '<div class="cpp-pdf-item">';
-        $pdf_output .= '<div class="cpp-pdf-title" style="font-weight: bold; font-size:' . $title_size . '; font-family:' . $font_family . '; margin-bottom: 15px; text-align: justify; word-wrap: break-word; hyphens: auto; line-height: 1.6; overflow-wrap: break-word; text-align-last: center; direction: rtl; unicode-bidi: embed;">' . $pdf_title . '</div>';
+        $pdf_output .= '<div class="cpp-pdf-item" style="text-align: right;">';
+        $pdf_output .= '<div class="cpp-pdf-title" style="font-weight: bold; font-size:' . $title_size . '; font-family:' . $font_family . '; margin-bottom: 15px; text-align: right; word-wrap: break-word; hyphens: auto; line-height: 1.6; overflow-wrap: break-word; direction: rtl; unicode-bidi: embed;">' . $pdf_title . '</div>';
         
-        if ($download_disabled) {
-            $pdf_output .= '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
-        } else {
-            $pdf_output .= '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $post->ID . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
+        // Only show download button if PDF URL exists
+        if (!empty($pdf_url)) {
+            if ($download_disabled) {
+                $pdf_output .= '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
+            } else {
+                $pdf_output .= '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $post->ID . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-size:' . $button_size . '; font-family:' . $font_family . '; font-weight: bold; cursor: pointer;">Download PDF</a>';
+            }
         }
         
         $pdf_output .= '</div>';
@@ -93,13 +96,16 @@ function cpp_display_pdfs_hook() {
         $download_disabled = isset($pdf['download_disabled']) ? $pdf['download_disabled'] : false;
 
         echo '<div class="cpp-pdf-wrapper" style="background-color:' . $bg_color . '; border: 2px solid ' . $border_color . '; padding: 20px; border-radius: 10px; margin: 0 auto 25px auto; max-width: 900px; width: 95%; position: relative; z-index: 9999; clear: both; display: block;">';
-        echo '<div class="cpp-pdf-item">';
-        echo '<div class="cpp-pdf-title" style="font-weight: bold; font-size: 20px; margin-bottom: 15px; text-align: justify; word-wrap: break-word; hyphens: auto; line-height: 1.6; overflow-wrap: break-word; text-align-last: center; direction: rtl; unicode-bidi: embed;">' . $pdf_title . '</div>';
+        echo '<div class="cpp-pdf-item" style="text-align: right;">';
+        echo '<div class="cpp-pdf-title" style="font-weight: bold; font-size: 20px; margin-bottom: 15px; text-align: right; word-wrap: break-word; hyphens: auto; line-height: 1.6; overflow-wrap: break-word; direction: rtl; unicode-bidi: embed;">' . $pdf_title . '</div>';
         
-        if ($download_disabled) {
-            echo '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Download PDF</a>';
-        } else {
-            echo '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $post->ID . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Download PDF</a>';
+        // Only show download button if PDF URL exists
+        if (!empty($pdf_url)) {
+            if ($download_disabled) {
+                echo '<a class="cpp-download-btn cpp-disabled-download" href="#" onclick="showDownloadMessage(); return false;" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Download PDF</a>';
+            } else {
+                echo '<a class="cpp-download-btn cpp-track-download" href="' . $pdf_url . '" target="_blank" download data-post-id="' . $post->ID . '" data-pdf-url="' . $pdf_url . '" data-pdf-title="' . $pdf_title . '" style="display: inline-block; padding: 12px 20px; background-color:' . $button_bg . '; color:' . $button_text . '; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer;">Download PDF</a>';
+            }
         }
         
         echo '</div>';
@@ -165,8 +171,7 @@ function cpp_enhanced_priority_styles() {
         .cpp-pdf-title {
             font-weight: bold !important;
             font-size: 20px !important;
-            text-align: justify !important;
-            text-align-last: center !important;
+            text-align: right !important;
             margin-bottom: 15px !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
@@ -384,8 +389,7 @@ function cpp_aggressive_cleanup_and_reorder() {
                         $title.css({
                             "direction": "rtl",
                             "unicode-bidi": "embed",
-                            "text-align": "justify",
-                            "text-align-last": "center",
+                            "text-align": "right",
                             "word-wrap": "break-word",
                             "overflow-wrap": "break-word",
                             "line-height": "1.6",
