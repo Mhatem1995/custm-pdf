@@ -294,12 +294,14 @@ function cpp_save_pdf_meta($post_id) {
     // Clean and validate PDF data before saving
     $clean_pdfs = [];
     foreach ($pdfs as $index => $pdf) {
-        // Skip empty entries
-        if (empty($pdf['url']) || empty($pdf['title'])) continue;
+        // Skip completely empty entries (no title AND no URL)
+        if (empty($pdf['title']) && empty($pdf['url'])) continue;
         
-        // Validate URL is actually a PDF
-        $file_extension = pathinfo($pdf['url'], PATHINFO_EXTENSION);
-        if (strtolower($file_extension) !== 'pdf') continue;
+        // Validate URL is actually a PDF only if URL is provided
+        if (!empty($pdf['url'])) {
+            $file_extension = pathinfo($pdf['url'], PATHINFO_EXTENSION);
+            if (strtolower($file_extension) !== 'pdf') continue;
+        }
         
         // Auto-apply special colors for first PDF during save
         if ($index === 0) {
@@ -313,7 +315,7 @@ function cpp_save_pdf_meta($post_id) {
         // Sanitize data
         $clean_pdf = [
             'title' => sanitize_text_field($pdf['title']),
-            'url' => esc_url_raw($pdf['url']),
+            'url' => !empty($pdf['url']) ? esc_url_raw($pdf['url']) : '', // Allow empty URL
             'bg_color' => sanitize_hex_color($pdf['bg_color'] ?? $default_bg),
             'border_color' => sanitize_hex_color($pdf['border_color'] ?? $default_border),
             'button_bg' => sanitize_hex_color($pdf['button_bg'] ?? '#0073aa'),
